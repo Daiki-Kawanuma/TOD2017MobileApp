@@ -1,0 +1,49 @@
+﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+             xmlns:googleMaps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps"
+             prism:ViewModelLocator.AutowireViewModel="True"
+             x:Class="TOD2017MobileApp.Views.MapPage">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <Style x:Key="ButtonStyle" TargetType="Button">
+                <Setter Property="TextColor" Value="White" />
+                <Setter Property="BackgroundColor" Value="#2196F3" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <StackLayout VerticalOptions="FillAndExpand"
+                 HorizontalOptions="FillAndExpand"
+                 Orientation="Vertical">
+        
+        <Label Text="{Binding Location.Value}"/>
+        
+        <googleMaps:Map x:Name="MyMap" 
+                        VerticalOptions="FillAndExpand"                    
+                        HorizontalOptions="FillAndExpand"                    
+                        IsShowingUser="True"/>
+        
+        <Grid HorizontalOptions="FillAndExpand"
+              VerticalOptions="End">
+            
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Button Grid.Column="0" 
+                    Text="DATA INSERTION"
+                    Style="{StaticResource ButtonStyle}"
+                    Command="{Binding NavigateToInsertionPageCommand}"/>
+
+            <Button Grid.Column="1"
+                    Text="ECG DEMO"
+                    Style="{StaticResource ButtonStyle}"
+                    Command="{Binding NavigateToDemoPageCommand}"/>
+
+        </Grid>
+    </StackLayout>
+
+</ContentPage>

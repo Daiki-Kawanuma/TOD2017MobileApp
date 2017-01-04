@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+             prism:ViewModelLocator.AutowireViewModel="True"
+             x:Class="TOD2017MobileApp.Views.DataInsertionPage">
+    
+    <StackLayout VerticalOptions="FillAndExpand"
+                 HorizontalOptions="FillAndExpand"
+                 Orientation="Vertical">
+        
+        <Button Text="Insert Altitude Data"
+                Command="{Binding InsertAltitudeDetumCommand}"/>
+        <Button Text="Insert Graph Data"
+                Command="{Binding InsertGraphDatumCommand}"/>
+        <Button Text="Insert Efficiency Data"
+                Command="{Binding InsertEfficienctyDatumCommand}"/>
+        <Button Text="Insert EfficiencyMax Data"
+                Command="{Binding InsertEfficienctyMaxDatumCommand}"/>
+        <Button Text="Insert SemanticLink Data"
+                Command="{Binding InsertSemanticLinkCommand}"/>
+        <Entry Text="{Binding FileName.Value, Mode=TwoWay}"/>
+        <Label Text="{Binding FilePath.Value}"/>
+        <Label Text="{Binding FileText.Value}"/>
+    </StackLayout>
+  
+</ContentPage>

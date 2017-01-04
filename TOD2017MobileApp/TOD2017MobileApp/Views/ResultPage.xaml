@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+             xmlns:forms="clr-namespace:OxyPlot.Xamarin.Forms;assembly=OxyPlot.Xamarin.Forms"
+             prism:ViewModelLocator.AutowireViewModel="True"
+             x:Class="TOD2017MobileApp.Views.ResultPage">
+    
+    <Grid>
+
+        <forms:PlotView Model="{Binding PlotModel.Value}" 
+                        VerticalOptions="FillAndExpand" 
+                        HorizontalOptions="FillAndExpand"/>
+
+        <StackLayout VerticalOptions="Center" 
+                     HorizontalOptions="Center" 
+                     IsVisible="{Binding IsBusy.Value}">
+
+            <ActivityIndicator VerticalOptions="Center"
+                               HorizontalOptions="Center"
+                               IsRunning="True"
+                               WidthRequest="100"
+                               HeightRequest="100"/>
+            <Label Text="...計算中..."
+                   HorizontalOptions="Center"
+                   FontSize="24"/>
+
+        </StackLayout>
+    </Grid>
+
+</ContentPage>
