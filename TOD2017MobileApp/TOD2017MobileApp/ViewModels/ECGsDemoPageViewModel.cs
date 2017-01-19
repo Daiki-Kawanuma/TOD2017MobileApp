@@ -34,7 +34,7 @@ namespace TOD2017MobileApp.ViewModels
             PlotModelRegeneLoss = new ReactiveProperty<PlotModel>();
             AtentionText = new ReactiveProperty<string>();
             
-            _ecgModel = ECGModel.GetECGModel(new SemanticLink{SemanticLinkId = 196});
+            _ecgModel = ECGModel.GetECGModel(new SemanticLink{SemanticLinkId = 198});
             _maximum = new double[]
             {
                 _ecgModel.GraphData.Max(v => v.ConvertLoss),

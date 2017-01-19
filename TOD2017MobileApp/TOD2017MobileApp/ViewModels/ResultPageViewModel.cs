@@ -36,19 +36,19 @@ namespace TOD2017MobileApp.ViewModels
             PlotModel = new ReactiveProperty<PlotModel>();
             IsBusy = new ReactiveProperty<bool> { Value = true };
         }
-        
+
         public void OnNavigatedFrom(NavigationParameters parameters)
         {
 
         }
 
-        public void OnNavigatedTo(NavigationParameters parameters)
+        public async void OnNavigatedTo(NavigationParameters parameters)
         {
             _positions = parameters[ParamPositions] as List<Position>;
             var semanticLink = parameters[ParamSemanticLink] as SemanticLink;
             _ecgModel = ECGModel.GetECGModel(semanticLink);
 
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 _lostEnergy = CalcLostEnergy();
                 _transitTime = (int)
@@ -89,7 +89,11 @@ namespace TOD2017MobileApp.ViewModels
                     _positions[i].Longitude) / 3.6;
 
                 var altitude = AltitudeCalculator.CalcAltitude(_positions[i].Latitude, _positions[i].Longitude);
-                var altitudeDiff = altitude.Altitude - altitudeBefore.Altitude;
+                double altitudeDiff = 0;
+                if (altitude != null && altitudeBefore != null)
+                {
+                    altitudeDiff = altitude.Altitude - altitudeBefore.Altitude;
+                }
                 altitudeBefore = altitude;
 
                 double airResistancePower = 0;
@@ -116,7 +120,7 @@ namespace TOD2017MobileApp.ViewModels
                         _positions[i].Timestamp.DateTime,
                         Car.GetLeaf().Weight);
 
-                double drivingResistancePower =               
+                double drivingResistancePower =
                     airResistancePower + rollingResistancePower + climbingResistancePower + accResistancePower;
 
                 double torque = 0;
@@ -178,7 +182,8 @@ namespace TOD2017MobileApp.ViewModels
                 MarkerFill = OxyColors.GreenYellow,
                 Points = { new ScatterPoint(_transitTime, _lostEnergy) }
             };
-            
+            model.Series.Add(trip);
+
             return model;
         }
     }

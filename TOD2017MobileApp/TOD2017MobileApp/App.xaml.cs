@@ -11,7 +11,6 @@ namespace TOD2017MobileApp
         protected override async void OnInitialized()
         {
             InitializeComponent();
-
             await NavigationService.NavigateAsync(nameof(MapPage));
         }
 

@@ -138,20 +138,6 @@ namespace TOD2017MobileApp.ViewModels
                                         RollingResistance = float.Parse(values[8]),
                                         AirResistance = float.Parse(values[9])
                                     });
-
-                                    break;
-                                case DataClass.SemanticLink:
-
-                                    realm.Add(new SemanticLink
-                                    {
-                                        SemanticLinkId = int.Parse(values[0]),
-                                        Semantics = "None",
-                                        MinLatitude = double.Parse(values[1]),
-                                        MaxLatitude = double.Parse(values[2]),
-                                        MinLongitude = double.Parse(values[2]),
-                                        MaxLongitude = double.Parse(values[3])
-                                    });
-
                                     break;
                                 case DataClass.Efficiency:
 

@@ -20,10 +20,12 @@
         
         <Label Text="{Binding Location.Value}"/>
         
-        <googleMaps:Map x:Name="MyMap" 
-                        VerticalOptions="FillAndExpand"                    
-                        HorizontalOptions="FillAndExpand"                    
-                        IsShowingUser="True"/>
+        <Label VerticalOptions="FillAndExpand"                    
+               HorizontalOptions="FillAndExpand"                    
+               Text="ECOLOG Mobile App"
+               FontSize="48"
+               HorizontalTextAlignment="Center"
+               VerticalTextAlignment="Center"/>
         
         <Grid HorizontalOptions="FillAndExpand"
               VerticalOptions="End">

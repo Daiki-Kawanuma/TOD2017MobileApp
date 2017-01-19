@@ -111,7 +111,7 @@ namespace TOD2017MobileApp.ViewModels
 
         public void OnNavigatedFrom(NavigationParameters parameters)
         {
-            
+            CrossGeolocator.Current.PositionChanged -= OnPositionChanged;
         }
 
         public async void OnNavigatedTo(NavigationParameters parameters)
