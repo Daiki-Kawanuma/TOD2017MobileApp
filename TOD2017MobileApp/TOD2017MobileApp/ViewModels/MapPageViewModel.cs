@@ -66,7 +66,7 @@ namespace TOD2017MobileApp.ViewModels
 
         private void OnPositionChanged(object sender, PositionEventArgs e)
         {
-            Location.Value = $"{e.Position.Latitude}, {e.Position.Longitude}, {e.Position.Timestamp}";
+            Location.Value = $"{e.Position.Latitude}, {e.Position.Longitude}, {e.Position.Timestamp.LocalDateTime}";
 
             var semanticLink = SemanticLink.TargetSemanticLinks
             .FirstOrDefault(v => e.Position.Latitude > v.MinLatitude

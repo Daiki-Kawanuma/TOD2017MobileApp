@@ -20,10 +20,11 @@ namespace TOD2017MobileApp.ViewModels
     {
         private readonly INavigationService _navigationService;
         public static readonly string ParamSemanticLink = "semantic_link";
+        public static readonly string ParamCalculator = "calculator";
         private SemanticLink _semanticLink;
         private ECGModel _ecgModel;
         private double _maximum;
-        private readonly IList<Position> _positions;
+        private ECOLOGCalculator _ecologCalculator;
 
         public ReactiveProperty<PlotModel> PlotModelConvertLoss { get; set; }
         public ReactiveProperty<PlotModel> PlotModelAirResistance { get; set; }
@@ -39,7 +40,6 @@ namespace TOD2017MobileApp.ViewModels
             PlotModelRollingResistance = new ReactiveProperty<PlotModel>();
             PlotModelRegeneLoss = new ReactiveProperty<PlotModel>();
             AtentionText = new ReactiveProperty<string>();
-            _positions = new List<Position>();
         }
 
         private PlotModel CreatePlotModel(string propertyName)
@@ -116,8 +116,20 @@ namespace TOD2017MobileApp.ViewModels
 
         public async void OnNavigatedTo(NavigationParameters parameters)
         {
-            _semanticLink = parameters[ParamSemanticLink] as SemanticLink;
+            if (parameters.ContainsKey(ParamCalculator))
+            {
+                _ecologCalculator = parameters[ParamCalculator] as ECOLOGCalculator;
+            }
+            else
+            {
+                _ecologCalculator = new ECOLOGCalculator();
+                _ecologCalculator.Init();
+            }
 
+            _ecologCalculator = new ECOLOGCalculator();
+            _ecologCalculator.Init();
+
+            _semanticLink = parameters[ParamSemanticLink] as SemanticLink;
             _ecgModel = ECGModel.GetECGModel(_semanticLink);
 
             _maximum = new double[]
@@ -151,12 +163,12 @@ namespace TOD2017MobileApp.ViewModels
                 || e.Position.Longitude < _semanticLink.MinLongitude
                 || e.Position.Longitude > _semanticLink.MaxLongitude)
             {
-                var parameter = new NavigationParameters {{ResultPageViewModel.ParamPositions, _positions}};
+                var parameter = new NavigationParameters {{ResultPageViewModel.ParamCalculator, _ecologCalculator}};
                 _navigationService.NavigateAsync($"/{nameof(ResultPage)}", parameter);
             }
             else
             {
-                _positions.Add(e.Position);
+                _ecologCalculator.PositionCollection.Add(e.Position);
             }
         }
     }

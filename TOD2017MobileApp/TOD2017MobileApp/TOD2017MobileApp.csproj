@@ -56,6 +56,7 @@
     <Compile Include="Models\AltitudeDatum.cs" />
     <Compile Include="Models\Car.cs" />
     <Compile Include="Models\ECGModel.cs" />
+    <Compile Include="Models\ECOLOGCalculator.cs" />
     <Compile Include="Models\EfficiencyDatum.cs" />
     <Compile Include="Models\EfficiencyMaxDatum.cs" />
     <Compile Include="Models\GraphDatum.cs" />

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
 using Prism.Navigation;
 using Reactive.Bindings;
@@ -20,10 +21,12 @@ namespace TOD2017MobileApp.ViewModels
 {
     public class ResultPageViewModel : BindableBase, INavigationAware
     {
-        public const string ParamPositions = "positions";
+        public const string ParamCalculator = "calculator";
         public const string ParamSemanticLink = "semantic_link";
         private readonly INavigationService _navigationService;
-        private IList<Position> _positions;
+        private ECOLOGCalculator _ecologCalculatorParam;
+        private ECOLOGCalculator _ecologCalculatorMine;
+        private SemanticLink _semanticLink;
         private double _lostEnergy;
         private int _transitTime;
         private ECGModel _ecgModel;
@@ -39,113 +42,45 @@ namespace TOD2017MobileApp.ViewModels
 
         public void OnNavigatedFrom(NavigationParameters parameters)
         {
+            
 
         }
 
         public async void OnNavigatedTo(NavigationParameters parameters)
         {
-            _positions = parameters[ParamPositions] as List<Position>;
+            _ecologCalculatorParam = parameters[ParamCalculator] as ECOLOGCalculator;
+            _ecologCalculatorMine = new ECOLOGCalculator();
+            _ecologCalculatorMine.Init();
+            _lostEnergy = _ecologCalculatorParam.EcologList.Sum();
+            _transitTime = (int) (_ecologCalculatorParam.PositionCollection.Last().Timestamp -
+                           _ecologCalculatorParam.PositionCollection.First().Timestamp).TotalSeconds;
             var semanticLink = parameters[ParamSemanticLink] as SemanticLink;
             _ecgModel = ECGModel.GetECGModel(semanticLink);
 
-            await Task.Run(() =>
-            {
-                _lostEnergy = CalcLostEnergy();
-                _transitTime = (int)
-                    (_positions.Last().Timestamp.DateTime - _positions.First().Timestamp.DateTime).TotalSeconds;
-            });
-
             PlotModel.Value = CreatePlotModel();
+
+            CrossGeolocator.Current.PositionChanged += OnPositionChanged;
+
+            if (CrossGeolocator.Current.IsListening == false)
+            {
+                CrossGeolocator.Current.DesiredAccuracy = 1;
+                await CrossGeolocator.Current.StartListeningAsync(minTime: 1000, minDistance: 0, includeHeading: false);
+            }
 
             var timer = new ReactiveTimer(TimeSpan.FromSeconds(5));
             timer.Subscribe(v =>
             {
                 timer.Stop();
-                _navigationService.NavigateAsync($"/{nameof(MapPage)}");
-            });
-        }
-
-        private double CalcLostEnergy()
-        {
-            double lostEnergy = 0;
-            AltitudeDatum altitudeBefore = AltitudeCalculator.CalcAltitude(_positions[0].Latitude, _positions[0].Longitude);
-            double speedBefore = 0;
-
-            for (int i = 1; i < _positions.Count - 1; i++)
-            {
-                var distanceDiff = DistanceCalculator.CalcDistance(_positions[i - 1].Latitude,
-                    _positions[i - 1].Longitude,
-                    _positions[i].Latitude,
-                    _positions[i].Longitude);
-
-                // meter per sec
-                var speed = SpeedCalculator.CalcSpeed(_positions[i - 1].Latitude,
-                    _positions[i - 1].Longitude,
-                    _positions[i - 1].Timestamp.DateTime,
-                    _positions[i + 1].Latitude,
-                    _positions[i + 1].Longitude,
-                    _positions[i + 1].Timestamp.DateTime,
-                    _positions[i].Latitude,
-                    _positions[i].Longitude) / 3.6;
-
-                var altitude = AltitudeCalculator.CalcAltitude(_positions[i].Latitude, _positions[i].Longitude);
-                double altitudeDiff = 0;
-                if (altitude != null && altitudeBefore != null)
+                if (_semanticLink != null)
                 {
-                    altitudeDiff = altitude.Altitude - altitudeBefore.Altitude;
+                    var parameter = new NavigationParameters { { ECGsPageViewModel.ParamCalculator, _ecologCalculatorMine } };
+                    _navigationService.NavigateAsync($"/{nameof(ECGsPage)}");
                 }
-                altitudeBefore = altitude;
-
-                double airResistancePower = 0;
-                if (speed > 1.0 / 3.6 && distanceDiff > 0)
-                    airResistancePower = AirResistanceCalculator.CalcPower(
-                        Constants.Rho, Car.GetLeaf().CdValue, Car.GetLeaf().FrontalProjectedArea, speed, speed);
-
-                double rollingResistancePower = 0;
-                if (speed > 1 && distanceDiff > 0)
-                    rollingResistancePower = RollingResistanceCalculator.CalcPower(
-                        Constants.Myu, Car.GetLeaf().Weight, Math.Atan(altitudeDiff / distanceDiff), speed);
-
-                double climbingResistancePower = 0;
-                if (speed > 1 && distanceDiff > 0)
-                    climbingResistancePower = ClimbingResistanceCalculator.CalcPower(
-                        Car.GetLeaf().Weight, Math.Atan(altitudeDiff / distanceDiff), speed);
-
-                double accResistancePower = 0;
-                if (speed > 1 && distanceDiff > 0)
-                    accResistancePower = AccResistanceCalculator.CalcPower(
-                        speedBefore,
-                        _positions[i - 1].Timestamp.DateTime,
-                        speed,
-                        _positions[i].Timestamp.DateTime,
-                        Car.GetLeaf().Weight);
-
-                double drivingResistancePower =
-                    airResistancePower + rollingResistancePower + climbingResistancePower + accResistancePower;
-
-                double torque = 0;
-                if (drivingResistancePower > 0 && speed > 0)
-                    torque = drivingResistancePower * 1000 * 3600 / speed * Car.GetLeaf().TireRadius /
-                             Car.GetLeaf().ReductionRatio;
-
-                var efficiency = EfficiencyCalculator.CalcEfficiency(Car.GetLeaf(), speed, torque).Efficiency;
-
-                double convertLoss = ConvertLossCaluculator.CalcEnergy(
-                    drivingResistancePower, Car.GetLeaf(), speed, efficiency);
-
-                double regeneEnergy = RegeneEnergyCalculator.CalcEnergy(drivingResistancePower,
-                    speed, Car.GetLeaf(), efficiency);
-
-                double regeneLoss = RegeneLossCalculator.CalcEnergy(drivingResistancePower, regeneEnergy,
-                    Car.GetLeaf(), speed, efficiency);
-
-                lostEnergy += LostEnergyCalculator.CalcEnergy(convertLoss, regeneLoss, airResistancePower,
-                    rollingResistancePower);
-
-                speedBefore = speed;
-            }
-
-            return lostEnergy;
+                else
+                {
+                    _navigationService.NavigateAsync($"/{nameof(MapPage)}");
+                }                    
+            });
         }
 
         private PlotModel CreatePlotModel()
@@ -185,6 +120,17 @@ namespace TOD2017MobileApp.ViewModels
             model.Series.Add(trip);
 
             return model;
+        }
+
+        private void OnPositionChanged(object sender, PositionEventArgs e)
+        {
+            _semanticLink = SemanticLink.TargetSemanticLinks
+            .FirstOrDefault(v => e.Position.Latitude > v.MinLatitude
+            && e.Position.Latitude < v.MaxLatitude
+            && e.Position.Longitude > v.MinLongitude
+            && e.Position.Longitude < v.MaxLongitude);
+
+            _ecologCalculatorMine.PositionCollection.Add(e.Position);
         }
     }
 }
