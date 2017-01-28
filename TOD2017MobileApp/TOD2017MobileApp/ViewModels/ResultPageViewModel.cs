@@ -103,7 +103,7 @@ namespace TOD2017MobileApp.ViewModels
 
             var scatterSeries = new ScatterSeries
             {
-                MarkerFill = OxyColors.LightGray
+                MarkerFill = OxyColors.Gray
             };
 
             foreach (var datum in _ecgModel.GraphData)
@@ -114,7 +114,9 @@ namespace TOD2017MobileApp.ViewModels
 
             var trip = new ScatterSeries
             {
-                MarkerFill = OxyColors.GreenYellow,
+                MarkerFill = OxyColors.Blue,
+                MarkerSize = 20,
+                MarkerType = MarkerType.Circle,
                 Points = { new ScatterPoint(_transitTime, _lostEnergy) }
             };
             model.Series.Add(trip);

@@ -9,7 +9,9 @@ namespace TOD2017MobileApp.Models
 {
     public class SemanticLink
     {
-        public static IList<SemanticLink> TargetSemanticLinks = new List<SemanticLink>
+        public static IList<SemanticLink> TargetSemanticLinks;
+
+        public static IList<SemanticLink> OutwardSemanticLinks = new List<SemanticLink>
         {
             // outward
             new SemanticLink
@@ -110,7 +112,11 @@ namespace TOD2017MobileApp.Models
                 MaxLatitude = 35.45277291,
                 MinLongitude = 139.5619204,
                 MaxLongitude = 139.5772564
-            },
+            }
+        };
+
+        public static IList<SemanticLink> HomewardSemanticLinks = new List<SemanticLink>
+        {
             // homeward
             new SemanticLink
             {

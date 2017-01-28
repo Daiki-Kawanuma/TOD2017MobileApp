@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Prism.Mvvm;
 using Plugin.Geolocator;
@@ -50,7 +51,7 @@ namespace TOD2017MobileApp.ViewModels
                 if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
                 {
                     await _pageDialogService.DisplayAlertAsync("Need location", "Gunna need that location", "OK");
-                    
+
                 }
                 await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
             }
@@ -67,6 +68,27 @@ namespace TOD2017MobileApp.ViewModels
         private void OnPositionChanged(object sender, PositionEventArgs e)
         {
             Location.Value = $"{e.Position.Latitude}, {e.Position.Longitude}, {e.Position.Timestamp.LocalDateTime}";
+
+            if (Coordinate.TommyHome.LatitudeStart < e.Position.Latitude
+                && Coordinate.TommyHome.LatitudeEnd > e.Position.Latitude
+                && Coordinate.TommyHome.LongitudeStart < e.Position.Longitude
+                && Coordinate.TommyHome.LongitudeEnd > e.Position.Longitude)
+            {
+                SemanticLink.TargetSemanticLinks = SemanticLink.OutwardSemanticLinks;
+            }
+            else if (Coordinate.Ynu.LatitudeStart < e.Position.Latitude
+                && Coordinate.Ynu.LatitudeEnd > e.Position.Latitude
+                && Coordinate.Ynu.LongitudeStart < e.Position.Longitude
+                && Coordinate.Ynu.LongitudeEnd > e.Position.Longitude)
+            {
+                SemanticLink.TargetSemanticLinks = SemanticLink.HomewardSemanticLinks;
+            }
+
+            if (SemanticLink.TargetSemanticLinks == null)
+            {
+                _pageDialogService.DisplayActionSheetAsync("位置検知エラー", "出発地点を特定できませんでした", "OK");
+                return;
+            }
 
             var semanticLink = SemanticLink.TargetSemanticLinks
             .FirstOrDefault(v => e.Position.Latitude > v.MinLatitude
