@@ -15,7 +15,9 @@ using Reactive.Bindings;
 using TOD2017MobileApp.Calculators;
 using TOD2017MobileApp.Calculators.Components;
 using TOD2017MobileApp.Models;
+using TOD2017MobileApp.Test;
 using TOD2017MobileApp.Views;
+using Xamarin.Forms;
 
 namespace TOD2017MobileApp.ViewModels
 {
@@ -32,18 +34,19 @@ namespace TOD2017MobileApp.ViewModels
         private ECGModel _ecgModel;
         public ReactiveProperty<PlotModel> PlotModel { get; set; }
         public ReactiveProperty<bool> IsBusy { get; set; }
+        private int _count;
 
         public ResultPageViewModel(INavigationService navigationService)
         {
             _navigationService = navigationService;
             PlotModel = new ReactiveProperty<PlotModel>();
             IsBusy = new ReactiveProperty<bool> { Value = true };
+            _count = 0;
         }
 
         public void OnNavigatedFrom(NavigationParameters parameters)
         {
-            
-
+            CrossGeolocator.Current.PositionChanged -= OnPositionChanged;
         }
 
         public async void OnNavigatedTo(NavigationParameters parameters)
@@ -52,8 +55,8 @@ namespace TOD2017MobileApp.ViewModels
             _ecologCalculatorMine = new ECOLOGCalculator();
             _ecologCalculatorMine.Init();
             _lostEnergy = _ecologCalculatorParam.EcologList.Sum();
-            _transitTime = (int) (_ecologCalculatorParam.PositionCollection.Last().Timestamp -
-                           _ecologCalculatorParam.PositionCollection.First().Timestamp).TotalSeconds;
+            _transitTime = (int)(_ecologCalculatorParam.PositionCollection.Last().Timestamp -
+                                  _ecologCalculatorParam.PositionCollection.First().Timestamp).TotalSeconds;
             var semanticLink = parameters[ParamSemanticLink] as SemanticLink;
             _ecgModel = ECGModel.GetECGModel(semanticLink);
 
@@ -67,20 +70,35 @@ namespace TOD2017MobileApp.ViewModels
                 await CrossGeolocator.Current.StartListeningAsync(minTime: 1000, minDistance: 0, includeHeading: false);
             }
 
-            var timer = new ReactiveTimer(TimeSpan.FromSeconds(5));
+            
+            var timer = new ReactiveTimer(TimeSpan.FromSeconds(1));
             timer.Subscribe(v =>
             {
-                timer.Stop();
-                if (_semanticLink != null)
+                Device.BeginInvokeOnMainThread(() =>
                 {
-                    var parameter = new NavigationParameters { { ECGsPageViewModel.ParamCalculator, _ecologCalculatorMine } };
-                    _navigationService.NavigateAsync($"/{nameof(ECGsPage)}");
-                }
-                else
-                {
-                    _navigationService.NavigateAsync($"/{nameof(MapPage)}");
-                }                    
+                    _count++;
+                    //OnPositionChanged(null, new PositionEventArgs(TestPosition.TestPositions[716 + _count]));
+
+                    if (_count >= 10)
+                    {
+                        timer.Stop();
+                        if (_semanticLink != null)
+                        {
+                            var parameter = new NavigationParameters
+                            {
+                                {ECGsPageViewModel.ParamCalculator, _ecologCalculatorMine},
+                                {ECGsPageViewModel.ParamSemanticLink, _semanticLink}
+                            };
+                            _navigationService.NavigateAsync($"/{nameof(ECGsPage)}", parameter);
+                        }
+                        else
+                        {
+                            _navigationService.NavigateAsync($"/{nameof(MapPage)}");
+                        }
+                    }
+                });
             });
+            timer.Start();
         }
 
         private PlotModel CreatePlotModel()
@@ -126,13 +144,17 @@ namespace TOD2017MobileApp.ViewModels
 
         private void OnPositionChanged(object sender, PositionEventArgs e)
         {
-            _semanticLink = SemanticLink.TargetSemanticLinks
-            .FirstOrDefault(v => e.Position.Latitude > v.MinLatitude
-            && e.Position.Latitude < v.MaxLatitude
-            && e.Position.Longitude > v.MinLongitude
-            && e.Position.Longitude < v.MaxLongitude);
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                if (_semanticLink == null)
+                    _semanticLink = SemanticLink.TargetSemanticLinks
+                        .FirstOrDefault(v => e.Position.Latitude > v.MinLatitude
+                                             && e.Position.Latitude < v.MaxLatitude
+                                             && e.Position.Longitude > v.MinLongitude
+                                             && e.Position.Longitude < v.MaxLongitude);
 
-            _ecologCalculatorMine.PositionCollection.Add(e.Position);
+                _ecologCalculatorMine.PositionCollection.Add(e.Position);
+            });
         }
     }
 }

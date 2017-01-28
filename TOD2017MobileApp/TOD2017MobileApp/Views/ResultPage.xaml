@@ -11,21 +11,6 @@
         <forms:PlotView Model="{Binding PlotModel.Value}" 
                         VerticalOptions="FillAndExpand" 
                         HorizontalOptions="FillAndExpand"/>
-
-        <StackLayout VerticalOptions="Center" 
-                     HorizontalOptions="Center" 
-                     IsVisible="{Binding IsBusy.Value}">
-
-            <ActivityIndicator VerticalOptions="Center"
-                               HorizontalOptions="Center"
-                               IsRunning="True"
-                               WidthRequest="100"
-                               HeightRequest="100"/>
-            <Label Text="...計算中..."
-                   HorizontalOptions="Center"
-                   FontSize="24"/>
-
-        </StackLayout>
     </Grid>
 
 </ContentPage>
