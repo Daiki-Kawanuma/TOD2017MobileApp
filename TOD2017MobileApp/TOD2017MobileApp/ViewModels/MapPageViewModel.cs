@@ -24,7 +24,7 @@ namespace TOD2017MobileApp.ViewModels
         private readonly INavigationService _navigationService;
         private readonly IPageDialogService _pageDialogService;
         private bool _didFinishedNavigation;
-        private ReactiveTimer _timer;
+        public static ReactiveTimer Timer { get; set; }
         public ReactiveProperty<string> Location { get; set; }
         public DelegateCommand NavigateToInsertionPageCommand { get; set; }
         public DelegateCommand NavigateToDemoPageCommand { get; set; }
@@ -44,8 +44,8 @@ namespace TOD2017MobileApp.ViewModels
         public void OnNavigatedFrom(NavigationParameters parameters)
         {
             CrossGeolocator.Current.PositionChanged -= OnPositionChanged;
-            //_timer.Stop();
-            //_timer = null;
+            //Timer.Stop();
+            //Timer = null;
         }
 
         public async void OnNavigatedTo(NavigationParameters parameters)
@@ -66,18 +66,18 @@ namespace TOD2017MobileApp.ViewModels
             {
                 CrossGeolocator.Current.DesiredAccuracy = 1;
                 await CrossGeolocator.Current.StartListeningAsync(minTime: 1000, minDistance: 0, includeHeading: false);
-            }
+            }                        
 
             /*** テストコード ***/
-            /*int i = 0;
-            var positions = TestPosition.TestPositions;
-            _timer = new ReactiveTimer(TimeSpan.FromMilliseconds(10));
-            _timer.Subscribe(x =>
+            /*var positions = TestPosition.TestPositions;
+            Timer = new ReactiveTimer(TimeSpan.FromMilliseconds(10));
+            Timer.Subscribe(x =>
             {
-                OnPositionChanged(null, new PositionEventArgs(positions[i]));
-                i++;
+                OnPositionChanged(null, new PositionEventArgs(positions[TestPosition.Index]));
+                TestPosition.Index++;
+                Debug.WriteLine(TestPosition.Index);
             });
-            _timer.Start();*/
+            Timer.Start();*/
             /*** テストコード ***/
         }
 

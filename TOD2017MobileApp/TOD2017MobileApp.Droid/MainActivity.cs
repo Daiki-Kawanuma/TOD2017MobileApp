@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.Views;
@@ -14,6 +15,7 @@ using Microsoft.Practices.Unity;
 using PCLStorage;
 using Plugin.Battery;
 using Plugin.Geolocator;
+using TOD2017MobileApp.ViewModels;
 using BatteryStatus = Plugin.Battery.Abstractions.BatteryStatus;
 using Console = System.Console;
 using Environment = Android.OS.Environment;
@@ -21,7 +23,9 @@ using File = Java.IO.File;
 
 namespace TOD2017MobileApp.Droid
 {
-    [Activity(Label = "TOD2017MobileApp", Icon = "@drawable/icon", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation, ScreenOrientation = ScreenOrientation.Landscape)]
+    [Activity(Label = "TOD2017MobileApp", Icon = "@drawable/icon", MainLauncher = true,
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
+        ScreenOrientation = ScreenOrientation.Landscape)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         private static readonly string RootFolderPath = "/sdcard/Download";
@@ -33,7 +37,7 @@ namespace TOD2017MobileApp.Droid
 
             base.OnCreate(bundle);
             Window.AddFlags(WindowManagerFlags.KeepScreenOn | WindowManagerFlags.TurnScreenOn);
-            Window.Attributes.ScreenBrightness = 1.0f;         
+            Window.Attributes.ScreenBrightness = 1.0f;
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
@@ -65,7 +69,7 @@ namespace TOD2017MobileApp.Droid
             AndroidEnvironment.UnhandledExceptionRaiser += (s, e) =>
             {
                 var filePath = RootFolderPath + $"/Exception_{DateTime.Now.ToString("yyyyMMdd-HHmmss")}.txt";
-                
+
                 var fos = new FileStream(filePath, FileMode.CreateNew);
                 var osw = new OutputStreamWriter(fos, "UTF-8");
                 var bw = new BufferedWriter(osw);
@@ -85,12 +89,14 @@ namespace TOD2017MobileApp.Droid
         private void Current_BatteryChanged(object sender, Plugin.Battery.Abstractions.BatteryChangedEventArgs e)
         {
             if (e.Status == BatteryStatus.Charging)
-            {
-                Recreate();
+            {                
+                //MapPageViewModel.Timer?.Stop();
+                //MapPageViewModel.Timer = null;
+                Recreate();                
             }
             else
             {
-                if(CrossGeolocator.Current.IsListening)
+                if (CrossGeolocator.Current.IsListening)
                     CrossGeolocator.Current.StopListeningAsync();
                 Window.ClearFlags(WindowManagerFlags.KeepScreenOn | WindowManagerFlags.TurnScreenOn);
             }
@@ -98,8 +104,8 @@ namespace TOD2017MobileApp.Droid
 
         protected override void OnDestroy()
         {
-            base.OnDestroy();
             CrossGeolocator.Current.StopListeningAsync();
+            base.OnDestroy();
         }
     }
 
@@ -107,8 +113,6 @@ namespace TOD2017MobileApp.Droid
     {
         public void RegisterTypes(IUnityContainer container)
         {
-
         }
     }
 }
-

@@ -154,14 +154,13 @@ namespace TOD2017MobileApp.ViewModels
 
 
             /*** テストコード ***/
-            /*int i = 393;
-            var positions = TestPosition.TestPositions;
+            /*var positions = TestPosition.TestPositions;
             _timer = new ReactiveTimer(TimeSpan.FromMilliseconds(1000));
             _timer.Subscribe(x =>
             {
-                OnPositionChanged(null, new PositionEventArgs(positions[i]));
-                i++;
-                Debug.WriteLine(i);
+                OnPositionChanged(null, new PositionEventArgs(positions[TestPosition.Index]));
+                TestPosition.Index++;
+                Debug.WriteLine(TestPosition.Index);
             });
             _timer.Start();*/
             /*** テストコード ***/

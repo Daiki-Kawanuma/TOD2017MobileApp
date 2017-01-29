@@ -40,7 +40,7 @@
         <Label x:Name="AtentionTextLabel"
                Text="{Binding AtentionText.Value}"
                TextColor="Red"
-               FontSize="28"
+               FontSize="42"
                HorizontalOptions="Center"
                VerticalOptions="Center"/>
 

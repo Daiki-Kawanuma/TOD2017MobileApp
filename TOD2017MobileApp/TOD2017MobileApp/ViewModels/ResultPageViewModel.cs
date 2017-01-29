@@ -77,7 +77,10 @@ namespace TOD2017MobileApp.ViewModels
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     _count++;
-                    //OnPositionChanged(null, new PositionEventArgs(TestPosition.TestPositions[716 + _count]));
+                    /*** テストコード ***/
+                    //OnPositionChanged(null, new PositionEventArgs(TestPosition.TestPositions[TestPosition.Index]));
+                    //TestPosition.Index++;
+                    /*** テストコード ***/
 
                     if (_count >= 10)
                     {
