@@ -6,6 +6,8 @@ namespace TOD2017MobileApp
 {
     public partial class App : PrismApplication
     {
+        public static string AppStatus;
+
         public App(IPlatformInitializer initializer = null) : base(initializer) { }
 
         protected override async void OnInitialized()

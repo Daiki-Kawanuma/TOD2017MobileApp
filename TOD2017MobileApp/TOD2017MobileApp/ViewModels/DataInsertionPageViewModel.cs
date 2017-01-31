@@ -46,6 +46,8 @@ namespace TOD2017MobileApp.ViewModels
             FilePath = new ReactiveProperty<string>();
             FileText = new ReactiveProperty<string>();
 
+            FileText.Value = "Count: " + Realm.GetInstance().All<EfficiencyDatum>().Count();
+
             InsertAltitudeDetumCommand = new DelegateCommand(async () =>
             {
                 await CheckPermissionAsync();

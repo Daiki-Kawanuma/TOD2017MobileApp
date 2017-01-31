@@ -89,10 +89,15 @@ namespace TOD2017MobileApp.Droid
         private void Current_BatteryChanged(object sender, Plugin.Battery.Abstractions.BatteryChangedEventArgs e)
         {
             if (e.Status == BatteryStatus.Charging)
-            {                
-                //MapPageViewModel.Timer?.Stop();
-                //MapPageViewModel.Timer = null;
-                Recreate();                
+            {
+                if (App.AppStatus == "MapPage")
+                {
+                    MapPageViewModel.Timer?.Stop();
+                    MapPageViewModel.Timer = null;
+                    ECGsPageViewModel.Timer?.Stop();
+                    ECGsPageViewModel.Timer = null;
+                    Recreate();
+                }
             }
             else
             {

@@ -44,12 +44,14 @@ namespace TOD2017MobileApp.ViewModels
         public void OnNavigatedFrom(NavigationParameters parameters)
         {
             CrossGeolocator.Current.PositionChanged -= OnPositionChanged;
-            //Timer.Stop();
-            //Timer = null;
+            Timer?.Stop();
+            Timer = null;
         }
 
         public async void OnNavigatedTo(NavigationParameters parameters)
         {
+            App.AppStatus = "MapPage";
+
             var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
             if (status != PermissionStatus.Granted)
             {
@@ -60,16 +62,16 @@ namespace TOD2017MobileApp.ViewModels
                 await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
             }
 
-            CrossGeolocator.Current.PositionChanged += OnPositionChanged;
+            /*CrossGeolocator.Current.PositionChanged += OnPositionChanged;
 
             if (CrossGeolocator.Current.IsListening == false)
             {
                 CrossGeolocator.Current.DesiredAccuracy = 1;
                 await CrossGeolocator.Current.StartListeningAsync(minTime: 1000, minDistance: 0, includeHeading: false);
-            }                        
+            }*/                  
 
             /*** テストコード ***/
-            /*var positions = TestPosition.TestPositions;
+            var positions = TestPosition.TestPositions;
             Timer = new ReactiveTimer(TimeSpan.FromMilliseconds(10));
             Timer.Subscribe(x =>
             {
@@ -77,7 +79,7 @@ namespace TOD2017MobileApp.ViewModels
                 TestPosition.Index++;
                 Debug.WriteLine(TestPosition.Index);
             });
-            Timer.Start();*/
+            Timer.Start();
             /*** テストコード ***/
         }
 
@@ -122,7 +124,8 @@ namespace TOD2017MobileApp.ViewModels
                 if (semanticLink != null)
                 {
                     _didFinishedNavigation = true;
-                    
+                    Debug.WriteLine("******************* NavigateTo ECGs page *************************");
+
                     var navigationParameters = new NavigationParameters
                     {
                         {ECGsPageViewModel.ParamSemanticLink, semanticLink}

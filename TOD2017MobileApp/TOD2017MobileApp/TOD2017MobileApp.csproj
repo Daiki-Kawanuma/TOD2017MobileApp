@@ -53,6 +53,7 @@
     <Compile Include="Calculators\RegeneLossCalculator.cs" />
     <Compile Include="Calculators\RollingResistanceCalculator.cs" />
     <Compile Include="Calculators\SpeedCalculator.cs" />
+    <Compile Include="IAudio.cs" />
     <Compile Include="Models\AltitudeDatum.cs" />
     <Compile Include="Models\Car.cs" />
     <Compile Include="Models\Coordinate.cs" />

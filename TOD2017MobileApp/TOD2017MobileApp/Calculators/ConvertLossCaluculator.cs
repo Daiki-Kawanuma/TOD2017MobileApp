@@ -16,12 +16,12 @@ namespace TOD2017MobileApp.Calculators
             if (drivingPower >= 0)
             {
                 convertLoss = ConsumedEnergyCaluculator.CalcEnergy(drivingPower, car, vehicleSpeed, efficiency)
-                    * ((1 - (efficiency + 0.0f) / 100) * car.InverterEfficiency);
+                    * ((1.0f - (efficiency + 0.0f) / 100.0f) * car.InverterEfficiency);
             }
             else
             {
                 convertLoss = ConsumedEnergyCaluculator.CalcEnergy(drivingPower, car, vehicleSpeed, efficiency)
-                    * ((1 / (efficiency + 0.0f) * 100 - 1) / car.InverterEfficiency);
+                    * ((1.0f / (efficiency + 0.0f) * 100.0f - 1.0f) / car.InverterEfficiency);
             }
             return convertLoss;
         }

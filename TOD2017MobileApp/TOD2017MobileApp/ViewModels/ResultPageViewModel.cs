@@ -2,6 +2,7 @@
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace TOD2017MobileApp.ViewModels
         public const string ParamSemanticLink = "semantic_link";
         private readonly INavigationService _navigationService;
         private ECOLOGCalculator _ecologCalculatorParam;
-        private ECOLOGCalculator _ecologCalculatorMine;
+        //private ECOLOGCalculator _ecologCalculatorMine;
         private SemanticLink _semanticLink;
         private double _lostEnergy;
         private int _transitTime;
@@ -51,24 +52,36 @@ namespace TOD2017MobileApp.ViewModels
 
         public async void OnNavigatedTo(NavigationParameters parameters)
         {
+            App.AppStatus = "ResultPage";
+
+            DependencyService.Get<IAudio>().PlayAudioFile("broadcasting.mp3");
+
             _ecologCalculatorParam = parameters[ParamCalculator] as ECOLOGCalculator;
-            _ecologCalculatorMine = new ECOLOGCalculator();
-            _ecologCalculatorMine.Init();
+            //_ecologCalculatorMine = new ECOLOGCalculator();
+            //_ecologCalculatorMine.Init();
             _lostEnergy = _ecologCalculatorParam.EcologList.Sum();
             _transitTime = (int)(_ecologCalculatorParam.PositionCollection.Last().Timestamp -
                                   _ecologCalculatorParam.PositionCollection.First().Timestamp).TotalSeconds;
             var semanticLink = parameters[ParamSemanticLink] as SemanticLink;
             _ecgModel = ECGModel.GetECGModel(semanticLink);
 
+            /*** デバッグコード ***/
+            Debug.WriteLine("LostEnergy: " + _ecologCalculatorParam.EcologList.Sum());
+            Debug.WriteLine("AirResistance: " + _ecologCalculatorParam.AirList.Sum());
+            Debug.WriteLine("Rolling: " + _ecologCalculatorParam.RollingList.Sum());
+            Debug.WriteLine("Convert: " + _ecologCalculatorParam.ConvertLossList.Sum());
+            Debug.WriteLine("Regene: " + _ecologCalculatorParam.RegeneLossList.Sum());
+            /*** デバッグコード ***/
+
             PlotModel.Value = CreatePlotModel();
 
-            CrossGeolocator.Current.PositionChanged += OnPositionChanged;
+            /*CrossGeolocator.Current.PositionChanged += OnPositionChanged;
 
             if (CrossGeolocator.Current.IsListening == false)
             {
                 CrossGeolocator.Current.DesiredAccuracy = 1;
                 await CrossGeolocator.Current.StartListeningAsync(minTime: 1000, minDistance: 0, includeHeading: false);
-            }
+            }*/
 
             
             var timer = new ReactiveTimer(TimeSpan.FromSeconds(1));
@@ -78,8 +91,8 @@ namespace TOD2017MobileApp.ViewModels
                 {
                     _count++;
                     /*** テストコード ***/
-                    //OnPositionChanged(null, new PositionEventArgs(TestPosition.TestPositions[TestPosition.Index]));
-                    //TestPosition.Index++;
+                    OnPositionChanged(null, new PositionEventArgs(TestPosition.TestPositions[TestPosition.Index]));
+                    TestPosition.Index++;
                     /*** テストコード ***/
 
                     if (_count >= 10)
@@ -89,7 +102,7 @@ namespace TOD2017MobileApp.ViewModels
                         {
                             var parameter = new NavigationParameters
                             {
-                                {ECGsPageViewModel.ParamCalculator, _ecologCalculatorMine},
+                                //{ECGsPageViewModel.ParamCalculator, _ecologCalculatorMine},
                                 {ECGsPageViewModel.ParamSemanticLink, _semanticLink}
                             };
                             _navigationService.NavigateAsync($"/{nameof(ECGsPage)}", parameter);
@@ -156,7 +169,7 @@ namespace TOD2017MobileApp.ViewModels
                                              && e.Position.Longitude > v.MinLongitude
                                              && e.Position.Longitude < v.MaxLongitude);
 
-                _ecologCalculatorMine.PositionCollection.Add(e.Position);
+                //_ecologCalculatorMine.PositionCollection.Add(e.Position);
             });
         }
     }

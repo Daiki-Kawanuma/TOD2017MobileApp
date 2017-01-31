@@ -29,7 +29,7 @@ namespace TOD2017MobileApp.ViewModels
         private double _maximum;
         private ECOLOGCalculator _ecologCalculator;
         private bool _didFinishedNavigation;
-        private ReactiveTimer _timer;
+        public static ReactiveTimer Timer { get; set; }
 
         public ReactiveProperty<PlotModel> PlotModelConvertLoss { get; set; }
         public ReactiveProperty<PlotModel> PlotModelAirResistance { get; set; }
@@ -118,12 +118,18 @@ namespace TOD2017MobileApp.ViewModels
         public void OnNavigatedFrom(NavigationParameters parameters)
         {
             CrossGeolocator.Current.PositionChanged -= OnPositionChanged;
-            //_timer.Stop();
-            //_timer = null;
+            Timer?.Stop();
+            Timer = null;
         }
 
         public async void OnNavigatedTo(NavigationParameters parameters)
         {
+            App.AppStatus = "ECGsPage";
+
+            Debug.WriteLine("*************** ECGsPage.OnNavigatedTo ******************");
+
+            DependencyService.Get<IAudio>().PlayAudioFile("broadcasting.mp3");
+
             if (parameters.ContainsKey(ParamCalculator))
             {
                 _ecologCalculator = parameters[ParamCalculator] as ECOLOGCalculator;
@@ -154,24 +160,24 @@ namespace TOD2017MobileApp.ViewModels
 
 
             /*** テストコード ***/
-            /*var positions = TestPosition.TestPositions;
-            _timer = new ReactiveTimer(TimeSpan.FromMilliseconds(1000));
-            _timer.Subscribe(x =>
+            var positions = TestPosition.TestPositions;
+            Timer = new ReactiveTimer(TimeSpan.FromMilliseconds(1000));
+            Timer.Subscribe(x =>
             {
                 OnPositionChanged(null, new PositionEventArgs(positions[TestPosition.Index]));
                 TestPosition.Index++;
                 Debug.WriteLine(TestPosition.Index);
             });
-            _timer.Start();*/
+            Timer.Start();
             /*** テストコード ***/
 
-            CrossGeolocator.Current.PositionChanged += OnPositionChanged;
+            /*CrossGeolocator.Current.PositionChanged += OnPositionChanged;
 
             if (CrossGeolocator.Current.IsListening == false)
             {
                 CrossGeolocator.Current.DesiredAccuracy = 1;
                 await CrossGeolocator.Current.StartListeningAsync(minTime: 1000, minDistance: 0, includeHeading: false);
-            }
+            }*/
         }
 
         private void OnPositionChanged(object sender, PositionEventArgs e)
@@ -187,6 +193,7 @@ namespace TOD2017MobileApp.ViewModels
                 || e.Position.Longitude > _semanticLink.MaxLongitude)
                 {
                     _didFinishedNavigation = true;
+
                     var parameter = new NavigationParameters
                     {
                         { ResultPageViewModel.ParamCalculator, _ecologCalculator },

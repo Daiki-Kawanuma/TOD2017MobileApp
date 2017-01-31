@@ -17,6 +17,11 @@ namespace TOD2017MobileApp.Models
     {
         public ObservableCollection<Position> PositionCollection { get; set; }
         public IList<double> EcologList { get; set; }
+        public IList<double> AirList { get; set; }
+        public IList<double> RollingList { get; set; }
+        public IList<double> ConvertLossList { get; set; }
+        public IList<double> RegeneLossList { get; set; }
+
         private AltitudeDatum _altitudeBefore;
         private double _speedBefore;
 
@@ -25,23 +30,27 @@ namespace TOD2017MobileApp.Models
             PositionCollection = new ObservableCollection<Position>();
             PositionCollection.CollectionChanged += (sender, args) =>
             {
-                CalcEcolog();
+                CalcEcolog(PositionCollection.Count);
             };
             EcologList = new List<double>();
+            AirList = new List<double>();
+            RollingList = new List<double>();
+            ConvertLossList = new List<double>();
+            RegeneLossList = new List<double>();
         }
 
-        private void CalcEcolog()
+        private void CalcEcolog(int count)
         {
-            if (PositionCollection.Count == 2)
+            if (count == 2)
             {
-                _altitudeBefore = AltitudeCalculator.CalcAltitude(PositionCollection.Last().Latitude, PositionCollection.Last().Longitude);
+                _altitudeBefore = AltitudeCalculator.CalcAltitude(PositionCollection[count - 1].Latitude, PositionCollection[count - 1].Longitude);
                 //Debug.WriteLine("AltitudeBefore: " + _altitudeBefore.Altitude);
             }
             else if (PositionCollection.Count > 2)
             {
-                var positionBefore = PositionCollection[PositionCollection.Count - 3];
-                var positionCurrent = PositionCollection[PositionCollection.Count - 2];
-                var positionAfter = PositionCollection[PositionCollection.Count - 1];
+                var positionBefore = PositionCollection[count - 3];
+                var positionCurrent = PositionCollection[count - 2];
+                var positionAfter = PositionCollection[count - 1];
 
                 var distanceDiff = DistanceCalculator.CalcDistance(positionBefore.Latitude,
                     positionBefore.Longitude,
@@ -60,7 +69,7 @@ namespace TOD2017MobileApp.Models
                     positionCurrent.Longitude) / 3.6;
                 //Debug.WriteLine("Speed: " + speed);
 
-                if (PositionCollection.Count == 3)
+                if (count == 3)
                     _speedBefore = speed;
 
                 var altitude = AltitudeCalculator.CalcAltitude(positionCurrent.Latitude, positionCurrent.Longitude);
@@ -122,14 +131,19 @@ namespace TOD2017MobileApp.Models
 
                 double regeneLoss = RegeneLossCalculator.CalcEnergy(drivingResistancePower, regeneEnergy,
                     Car.GetLeaf(), speed, efficiency);
-                //Debug.WriteLine("regeneLoss: " + regeneLoss);
+                Debug.WriteLine($"{positionCurrent.Timestamp.DateTime}: {regeneLoss}, {efficiency}");
 
                 double lostEnergy = LostEnergyCalculator.CalcEnergy(convertLoss, regeneLoss, airResistancePower,
                     rollingResistancePower);
-
                 //Debug.WriteLine("LostEnergy: " + lostEnergy);
 
+                _speedBefore = speed;
+
                 EcologList.Add(lostEnergy);
+                AirList.Add(airResistancePower);
+                RollingList.Add(rollingResistancePower);
+                ConvertLossList.Add(convertLoss);
+                RegeneLossList.Add(regeneLoss);
             }
         }
     }
