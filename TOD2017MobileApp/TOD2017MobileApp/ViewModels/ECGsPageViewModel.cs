@@ -16,6 +16,8 @@ using TOD2017MobileApp.Models;
 using TOD2017MobileApp.Test;
 using TOD2017MobileApp.Views;
 using Xamarin.Forms;
+using System.Reactive.Linq;
+using System.Collections.Concurrent;
 
 namespace TOD2017MobileApp.ViewModels
 {
@@ -27,7 +29,7 @@ namespace TOD2017MobileApp.ViewModels
         private SemanticLink _semanticLink;
         private ECGModel _ecgModel;
         private double _maximum;
-        private ECOLOGCalculator _ecologCalculator;
+		private ECOLOGCalculator _caluculator;
         private bool _didFinishedNavigation;
         public static ReactiveTimer Timer { get; set; }
 
@@ -125,19 +127,20 @@ namespace TOD2017MobileApp.ViewModels
         public async void OnNavigatedTo(NavigationParameters parameters)
         {
             App.AppStatus = "ECGsPage";
-
-            Debug.WriteLine("*************** ECGsPage.OnNavigatedTo ******************");
+			App.EventList.Add(Observable.FromEventPattern<PositionEventArgs>(
+				h => CrossGeolocator.Current.PositionChanged += h, h => CrossGeolocator.Current.PositionChanged -= h)
+							  .Subscribe(e => OnPositionChanged(e.Sender, e.EventArgs)));
 
             DependencyService.Get<IAudio>().PlayAudioFile("broadcasting.mp3");
 
             if (parameters.ContainsKey(ParamCalculator))
             {
-                _ecologCalculator = parameters[ParamCalculator] as ECOLOGCalculator;
+                _caluculator = parameters[ParamCalculator] as ECOLOGCalculator;
             }
             else
             {
-                _ecologCalculator = new ECOLOGCalculator();
-                _ecologCalculator.Init();
+				_caluculator = new ECOLOGCalculator();
+				_caluculator.Init();
             }
 
             _semanticLink = parameters[ParamSemanticLink] as SemanticLink;
@@ -158,37 +161,39 @@ namespace TOD2017MobileApp.ViewModels
 
             AtentionText.Value = _ecgModel.AtentionText;
 
-
             /*** テストコード ***/
-            var positions = TestPosition.TestPositions;
-            Timer = new ReactiveTimer(TimeSpan.FromMilliseconds(1000));
+            /*var positions = TestPosition.TestPositions;
+            Timer = new ReactiveTimer(TimeSpan.FromMilliseconds(200));
             Timer.Subscribe(x =>
             {
-                OnPositionChanged(null, new PositionEventArgs(positions[TestPosition.Index]));
-                TestPosition.Index++;
-                Debug.WriteLine(TestPosition.Index);
+				Device.BeginInvokeOnMainThread(() =>
+				{ 
+					OnPositionChanged(null, new PositionEventArgs(positions[TestPosition.Index]));
+					TestPosition.Index++;
+				});
             });
-            Timer.Start();
-            /*** テストコード ***/
+			Timer.Start();*/
+			/*** テストコード ***/
 
-            /*CrossGeolocator.Current.PositionChanged += OnPositionChanged;
-
+			//CrossGeolocator.Current.PositionChanged += OnPositionChanged;
             if (CrossGeolocator.Current.IsListening == false)
             {
                 CrossGeolocator.Current.DesiredAccuracy = 1;
                 await CrossGeolocator.Current.StartListeningAsync(minTime: 1000, minDistance: 0, includeHeading: false);
-            }*/
+            }
         }
 
         private void OnPositionChanged(object sender, PositionEventArgs e)
         {
             Device.BeginInvokeOnMainThread(() =>
             {
+				App.CurrentPosition = e.Position;
+
                 if(_didFinishedNavigation)
                     return;
 
-                if (e.Position.Latitude < _semanticLink.MinLatitude
-                || e.Position.Latitude > _semanticLink.MaxLatitude
+                if (e.Position.Latitude < _semanticLink.MinLatitude - 0.0001
+                || e.Position.Latitude > _semanticLink.MaxLatitude + 0.0001
                 || e.Position.Longitude < _semanticLink.MinLongitude
                 || e.Position.Longitude > _semanticLink.MaxLongitude)
                 {
@@ -196,14 +201,14 @@ namespace TOD2017MobileApp.ViewModels
 
                     var parameter = new NavigationParameters
                     {
-                        { ResultPageViewModel.ParamCalculator, _ecologCalculator },
+                        { ResultPageViewModel.ParamCalculator, _caluculator },
                         { ResultPageViewModel.ParamSemanticLink, _semanticLink}
                     };
                     _navigationService.NavigateAsync($"/{nameof(ResultPage)}", parameter);
                 }
                 else
                 {
-                    _ecologCalculator.PositionCollection.Add(e.Position);
+					_caluculator.PositionCollection.Add(e.Position);
                 }           
             });  
         }

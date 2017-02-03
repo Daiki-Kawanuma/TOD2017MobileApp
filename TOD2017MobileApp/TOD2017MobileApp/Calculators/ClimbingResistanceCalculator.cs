@@ -20,5 +20,10 @@ namespace TOD2017MobileApp.Calculators
         {
             return CalcForce(vehicleMass, theta) * vehicleSpeed / 3600 / 1000;
         }
+
+		public static double CalcPowerPreVer(double carWeight, double altitudeDiff)
+		{
+			return carWeight * 9.8 * altitudeDiff * 0.278 * 0.000001;
+		}
     }
 }

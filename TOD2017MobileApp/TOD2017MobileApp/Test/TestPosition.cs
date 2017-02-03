@@ -9,7 +9,7 @@ namespace TOD2017MobileApp.Test
 {
     class TestPosition
     {
-        public static int Index { get; set; } = 0;
+        public static volatile int Index = 0;
 
         public static List<Position> TestPositions =
             new List<Position>

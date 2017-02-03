@@ -9,6 +9,7 @@ namespace TOD2017MobileApp.Calculators
     public static class AirResistanceCalculator
     {
         //空気抵抗力
+		//meter per sec
         public static double CalcForce(double rho, double Cd, double frontProjectedArea, double windSpeed)
         {
             return rho * Cd * frontProjectedArea * Math.Pow(windSpeed, 2) / 2;

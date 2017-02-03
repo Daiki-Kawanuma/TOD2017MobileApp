@@ -24,5 +24,29 @@ namespace TOD2017MobileApp.Calculators
             }
             return regeneLoss;
         }
+
+		public static double CalcEnergyPreVer(double drivingPower, double speed, int efficiency)
+		{
+			double regeneLimit = 0.15 * 9.8 * 1600;
+			double regeneLoss;
+			if (drivingPower > 0)
+			{
+				regeneLoss = 0;
+			}
+			else if (speed * 3.6 < 7)
+			{
+				regeneLoss = drivingPower;
+			}
+			else if (drivingPower > -regeneLimit * speed * 0.278 * 0.000001)
+			{
+				regeneLoss = 0;
+			}
+			else 
+			{
+				regeneLoss = drivingPower + regeneLimit * speed * 0.278 * 0.000001;
+			}
+
+			return regeneLoss;
+		}
     }
 }

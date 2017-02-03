@@ -12,13 +12,7 @@ namespace TOD2017MobileApp.Calculators
     public class AltitudeCalculator
     {
         public static AltitudeDatum CalcAltitude(double latitude, double longitude)
-        {
-            Debug.WriteLine($"Altitude count: " + Realm.GetInstance()
-                .All<AltitudeDatum>().Count(row => row.LowerLatitude <= latitude
-                                       && row.UpperLatitude > latitude
-                                       && row.LowerLongitude <= longitude
-                                       && row.UpperLongitude > longitude));
-
+		{
             return Realm.GetInstance()
                 .All<AltitudeDatum>()
                 .FirstOrDefault(row => row.LowerLatitude <= latitude

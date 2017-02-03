@@ -168,9 +168,9 @@ namespace TOD2017MobileApp.Models
                 SemanticLinkId = 211,
                 Semantics = "南台～下瀬谷二丁目",
                 MinLatitude = 35.45878911,
-                MaxLatitude = 35.47433081,
-                MinLongitude = 139.491014,
-                MaxLongitude = 139.5010665
+                MaxLatitude = 35.46641173,
+                MinLongitude = 139.4808058,
+                MaxLongitude = 139.4909644
             },
             new SemanticLink
             {

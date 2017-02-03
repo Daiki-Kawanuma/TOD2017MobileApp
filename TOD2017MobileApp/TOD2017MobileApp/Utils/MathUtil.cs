@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -92,5 +93,11 @@ namespace TOD2017MobileApp.Utils
 
             return new Tuple<double, double, double>(fQ1, fQ2, fQ3);
         }
+
+		public static int CalculateClassNumber(IList list)
+		{
+			// スタージェスの公式
+			return (int)(1 + Math.Log(list.Count, 2));
+		}
     }
 }

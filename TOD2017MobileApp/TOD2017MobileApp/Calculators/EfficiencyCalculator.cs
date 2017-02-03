@@ -16,11 +16,6 @@ namespace TOD2017MobileApp.Calculators
         {
             double rpm = MathUtil.ConvertSpeedToRev(car, speed);
 
-            Debug.WriteLine("EfficiencyCount: " + Realm.GetInstance()
-                .All<EfficiencyDatum>()
-                .Where(v => v.Torque == (int)Math.Round(torque))
-                .Count(v => v.Rev == (int)(Math.Round(rpm / 10)) * 10));
-
             var efficiency = Realm.GetInstance()
                 .All<EfficiencyDatum>()
                 .Where(v => v.Torque == (int)Math.Round(torque))
