@@ -57,11 +57,6 @@ namespace TOD2017MobileApp.Models
 		    var rollingResistanceSigma = data.Average(v => v.RollingResistance) - data.StdDev(v => v.RollingResistance);
 		    var convertLossSigma = data.Average(v => v.ConvertLoss) - data.StdDev(v => v.ConvertLoss);
 
-			Debug.WriteLine("RegeneLossSigma: " + regeneLossSigma);
-			Debug.WriteLine("AirResistanceSigma: " + airResistanceSigma);
-			Debug.WriteLine("RollingResistanceSigma: " + rollingResistanceSigma);
-			Debug.WriteLine("ConvertLossSigma: " + convertLossSigma);
-
 		    return new List<EnergyStackModel>
 		    {
 		        new EnergyStackModel

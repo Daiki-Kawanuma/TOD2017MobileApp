@@ -17,7 +17,7 @@
                 Command="{Binding InsertEfficienctyDatumCommand}"/>
         <Button Text="Insert EfficiencyMax Data"
                 Command="{Binding InsertEfficienctyMaxDatumCommand}"/>
-        <Button Text="Insert SemanticLink Data"
+        <Button Text="Insert SemanticLinkCurrent Data"
                 Command="{Binding InsertSemanticLinkCommand}"/>
         <Entry Text="{Binding FileName.Value, Mode=TwoWay}"/>
         <Label Text="{Binding FilePath.Value}"/>

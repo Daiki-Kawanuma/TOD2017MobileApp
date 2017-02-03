@@ -16,6 +16,7 @@ using OxyPlot.Axes;
 using OxyPlot.Series;
 using System.Reactive.Linq;
 using System.Reflection;
+using PCLStorage;
 using Plugin.Geolocator;
 using TOD2017MobileApp.Test;
 
@@ -23,10 +24,13 @@ namespace TOD2017MobileApp.ViewModels
 {
     public class EnergyStackPageViewModel : BindableBase
     {
+        private static readonly string RootFolderPath = "/sdcard/Download";
+
         public ReactiveProperty<PlotModel> PlotModelChorale { get; set; }
         public ReactiveProperty<PlotModel> PlotModelEnergyStack { get; set; }
         public ICommand PlusCommand { get; set; }
-        public SemanticLink SemanticLink { get; set; }
+        public SemanticLink SemanticLinkCurrent { get; set; }
+        public SemanticLink SemanticLinkPrevious { get; set; }
         public String Direction { get; set; }
         public ChoraleModel ChoraleModel { get; set; }
         public IList<EnergyStackModel> EnergyStackModelList { get; set; }
@@ -39,7 +43,14 @@ namespace TOD2017MobileApp.ViewModels
             PlotModelChorale = new ReactiveProperty<PlotModel>();
             PlotModelEnergyStack = new ReactiveProperty<PlotModel>();
 
-            PlusCommand = new DelegateCommand(() => { });
+            PlusCommand = new DelegateCommand(async() =>
+            {
+                var rootFolder = await FileSystem.Current.GetFolderFromPathAsync(RootFolderPath);
+                var file = await rootFolder.CreateFileAsync($"Plus_{DateTime.Now:yyyy-MM-dd}.txt",
+                    CreationCollisionOption.OpenIfExists);
+				var writedText = await file.ReadAllTextAsync();
+				await file.WriteAllTextAsync(writedText + $"{DateTime.Now},{SemanticLinkPrevious?.SemanticLinkId},{SemanticLinkPrevious?.Semantics}{System.Environment.NewLine}");
+            });
 
             Calculator = new ECOLOGCalculator();
             Calculator.Init();
@@ -49,14 +60,14 @@ namespace TOD2017MobileApp.ViewModels
                     h => CrossGeolocator.Current.PositionChanged -= h)
                 .Subscribe(e => OnPositionChanged(e.Sender, e.EventArgs)));
 
-            /*if (CrossGeolocator.Current.IsListening == false)
+            if (CrossGeolocator.Current.IsListening == false)
             {
                 CrossGeolocator.Current.DesiredAccuracy = 1;
                 CrossGeolocator.Current.StartListeningAsync(minTime: 1000, minDistance: 0, includeHeading: false);
-            }*/
+            }
 
             /*** テストコード ***/
-            var positions = TestPosition.TestPositions;
+            /*var positions = TestPosition.TestPositions;
             Timer = new ReactiveTimer(TimeSpan.FromMilliseconds(200));
             Timer.Subscribe(x =>
             {
@@ -67,7 +78,7 @@ namespace TOD2017MobileApp.ViewModels
                     Debug.WriteLine(TestPosition.Index);
                 });
             });
-            Timer.Start();
+            Timer.Start();*/
             /*** テストコード ***/
         }
 
@@ -100,9 +111,9 @@ namespace TOD2017MobileApp.ViewModels
                 }
                 else
                 {
-                    if (SemanticLink == null)
+                    if (SemanticLinkCurrent == null)
                     {
-                        SemanticLink = SemanticLink.TargetSemanticLinks
+                        SemanticLinkCurrent = SemanticLink.TargetSemanticLinks
                             .FirstOrDefault(v => e.Position.Latitude > v.MinLatitude
                                                  && e.Position.Latitude < v.MaxLatitude
                                                  && e.Position.Longitude > v.MinLongitude
@@ -110,20 +121,23 @@ namespace TOD2017MobileApp.ViewModels
                     }
                     else
                     {
-                        if (e.Position.Latitude < SemanticLink.MinLatitude - 0.0001
-                            || e.Position.Latitude > SemanticLink.MaxLatitude + 0.0001
-                            || e.Position.Longitude < SemanticLink.MinLongitude
-                            || e.Position.Longitude > SemanticLink.MaxLongitude)
+                        if (e.Position.Latitude < SemanticLinkCurrent.MinLatitude - 0.0001
+                            || e.Position.Latitude > SemanticLinkCurrent.MaxLatitude + 0.0001
+                            || e.Position.Longitude < SemanticLinkCurrent.MinLongitude
+                            || e.Position.Longitude > SemanticLinkCurrent.MaxLongitude)
                         {
-                            ChoraleModel = ChoraleModel.CreateChoraleModel(SemanticLink);
+                            ChoraleModel = ChoraleModel.CreateChoraleModel(SemanticLinkCurrent);
                             EnergyStackModelList =
-                                EnergyStackModel.CreateEnergyStackSource(Calculator.GetGraphDatum(), SemanticLink);
+                                EnergyStackModel.CreateEnergyStackSource(Calculator.GetGraphDatum(), SemanticLinkCurrent);
 
                             PlotModelChorale.Value = CreatePlotModelChorale();
                             PlotModelEnergyStack.Value = CreatePlotModelEnergyStack();
 
                             Calculator.Init();
-                            SemanticLink = null;
+                            SemanticLinkPrevious = SemanticLinkCurrent.Copy();
+                            SemanticLinkCurrent = null;
+
+                            DependencyService.Get<IAudio>().PlayAudioFile("broadcasting.mp3");
                         }
                         else
                         {
@@ -138,7 +152,7 @@ namespace TOD2017MobileApp.ViewModels
         {
             var plotModel = new PlotModel
             {
-                Subtitle = $"Semanantic Link: {SemanticLink.SemanticLinkId}, Direction: {Direction}"
+                Subtitle = $"Semanantic Link: {SemanticLinkCurrent.SemanticLinkId}, Direction: {Direction}"
             };
 
             var colorAxis = new LinearColorAxis
@@ -216,8 +230,6 @@ namespace TOD2017MobileApp.ViewModels
 
             foreach (var propertyInfo in typeof(EnergyStackModel).GetRuntimeProperties())
             {
-				Debug.WriteLine(propertyInfo.Name);
-
 				if (propertyInfo.Name == "Category")
 					continue;
 

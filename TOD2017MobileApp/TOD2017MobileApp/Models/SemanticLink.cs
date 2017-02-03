@@ -11,6 +11,19 @@ namespace TOD2017MobileApp.Models
     {
         public static IList<SemanticLink> TargetSemanticLinks;
 
+		public SemanticLink Copy()
+		{
+		    return new SemanticLink
+		    {
+		        Semantics = this.Semantics,
+		        SemanticLinkId = this.SemanticLinkId,
+		        MaxLatitude = this.MaxLatitude,
+		        MinLatitude = this.MinLatitude,
+		        MaxLongitude = this.MaxLongitude,
+		        MinLongitude = this.MinLongitude
+		    };
+		}
+
         public static IList<SemanticLink> OutwardSemanticLinks = new List<SemanticLink>
         {
             // outward

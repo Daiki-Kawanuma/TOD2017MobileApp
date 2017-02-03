@@ -129,7 +129,7 @@ namespace TOD2017MobileApp.ViewModels
 										 && e.Position.Longitude > v.MinLongitude
 										 && e.Position.Longitude < v.MaxLongitude);
 
-				//semanticLink = SemanticLink.TargetSemanticLinks.FirstOrDefault(v => v.SemanticLinkId == 196);
+				//semanticLink = SemanticLinkCurrent.TargetSemanticLinks.FirstOrDefault(v => v.SemanticLinkId == 196);
 
 				if (semanticLink != null)
 				{
