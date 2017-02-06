@@ -95,13 +95,21 @@ namespace TOD2017MobileApp.Droid
 				if ((Coordinate.TommyHome.LatitudeStart < App.CurrentPosition?.Latitude
 					&& Coordinate.TommyHome.LatitudeEnd > App.CurrentPosition?.Latitude
 					&& Coordinate.TommyHome.LongitudeStart < App.CurrentPosition?.Longitude
-				     && Coordinate.TommyHome.LongitudeEnd > App.CurrentPosition?.Longitude)
+					 && Coordinate.TommyHome.LongitudeEnd > App.CurrentPosition?.Longitude)
 					|| (Coordinate.Ynu.LatitudeStart < App.CurrentPosition?.Latitude
 						 && Coordinate.Ynu.LatitudeEnd > App.CurrentPosition?.Latitude
 						 && Coordinate.Ynu.LongitudeStart < App.CurrentPosition?.Longitude
-					    && Coordinate.Ynu.LongitudeEnd > App.CurrentPosition?.Longitude))
+						&& Coordinate.Ynu.LongitudeEnd > App.CurrentPosition?.Longitude))
 				{
 					Recreate();
+				}
+				else 
+				{
+					if (CrossGeolocator.Current.IsListening == false)
+					{
+						CrossGeolocator.Current.DesiredAccuracy = 1;
+						CrossGeolocator.Current.StartListeningAsync(minTime: 1000, minDistance: 0, includeHeading: false);
+					}
 				}
 			}
 			else
